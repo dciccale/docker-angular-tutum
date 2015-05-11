@@ -1,30 +1,44 @@
 # Docker, AngularJS and Tutum — Part 1
 
+IMAGE HERE
+
+Level: Beginner
+
 This is part 1 of a 3 post series, where we will cover topics related to development, testing, Docker, continuous integration and continuous delivery.
 
 In this tutorial you will learn how to:
 
 - Set up a simple NodeJS and AngularJS app
 - Create a Docker image, push it to DockerHub and run a container
-- Running tests with Mocha
-- Deploy to DigitalOcean and Continous Deployment with Tutum
+- Unit test with Karma and Mocha
+- Deploy to DigitalOcean and Continous Deployment with [Tutum](https://www.tutum.co/)
 
 The tools needed for development will be mentioned and explained through out the tutorial.
 
-All the code of this tutorial is available on github <url>/tag
+All the code of this tutorial is available on github url/tag
+
+After watching this tweet I will try to make this tutorial as much as easy to follow as possible
+
+https://twitter.com/ossia/status/588389121053200385
 
 Let's get started.
 
 ### Set Up a NodeJS and AngularJS App
 
 First you need to [download NodeJS](http://nodejs.org/download) (if not already installed).
-For client dependencies we will be using Bower, to install it run the following command:
+For client dependencies we will be using Bower, to install it run the following command in your terminal.
 
 ```sh
 $ [sudp] npm install -g bower
 ```
 
-Create a [package.json](link) and a [bower.json](link) file, they should look something like in the repo or grab them from there directly.
+Ceate a directory for your app
+
+```sh
+$ mkdir my_app
+```
+
+Create a [package.json](link) and a [bower.json](link) file, they should look something like in the repo or grab them from there directly. (if you do that skip the next step and just run `bower install` and `npm install`)
 
 ```sh
 $ npm init
@@ -33,7 +47,7 @@ $ bower init
 ... follow instructions
 ```
 
-#### Client app
+### Client app
 Create a directory structure for our `client` code and change default bower_components location to be inside this directory by creating a [.bowerrc](link) file
 
 ```sh
@@ -44,7 +58,9 @@ $ mkdir -p client/components/navbar
 $ echo '{"directory": "client/bower_components"}' > .bowerrc
 ```
 
-Now all depenencies will be installed in `client/bower_components`
+The last command indicates bower that all depenencies will be installed in `client/bower_components`
+
+Install deps
 
 ```sh
 $ bower install --save angular angular-ui-router bootstrap angular-bootstrap
@@ -75,8 +91,6 @@ In `client/index.html` we define our base html for the app, we load all css/js d
       <meta charset="utf-8">
       <meta http-equiv="X-UA-Compatible", content="IE=edge,chrome=1">
       <meta name="viewport", content="width=device-width, initial-scale=1.0">
-      <meta name="description", content="">
-      <meta name="author", content="">
 
       <!-- enable html5mode routes -->
       <base href="/">
@@ -101,7 +115,6 @@ In `client/index.html` we define our base html for the app, we load all css/js d
       <script src="bower_components/angular/angular.js"></script>
       <script src="bower_components/angular-ui-router/release/angular-ui-router.js"></script>
       <script src="bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
-      <script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
 
       <!-- app -->
       <script src="app/app.js"></script>
@@ -129,14 +142,13 @@ angular.module('app', [
     $urlRouterProvider.otherwise('/'); // if route not found redirect to /
   }])
   // after the configuration and when app runs the first time we o some more stuff
-  .run(['$rootScope', '$state', '$stateParams', function ($rootScope, $state, $stateParams) {
+  .run(['$rootScope', '$state', function ($rootScope, $state) {
     'use strict';
     // this is available from all across the app
     $rootScope.appName = 'app';
 
-    // allow access from templates
+    // make $state available from templates
     $rootScope.$state = $state;
-    $rootScope.$stateParams = $stateParams;
   }]);
 ```
 
@@ -234,8 +246,9 @@ and the `client/app/about/about.html` template:
 
 And finally the `client/components/navbar/navbar.html`:
 
-Notice that there is some boilerplate for making the navbar responsive using the [angular-ui-bootstrap](https://angular-ui.github.io/bootstrap/#/collapse) collapse directive.
-And that we are using the `$state` that we defined in our `app.js` and the [$state.is()](https://github.com/angular-ui/ui-router/wiki/Quick-Reference#stateisstateorname--params) method to mark navigation item as active accordingly.
+Notice that there is some boilerplate for making the navbar responsive using the [angular-ui-bootstrap collapse directive](https://angular-ui.github.io/bootstrap/#/collapse).
+And that we are using the `$state` object in the template that we defined in our `app.js` and the [$state.is()](https://github.com/angular-ui/ui-router/wiki/Quick-Reference#stateisstateorname--params) method to mark navigation item as active accordingly.
+With `ng-init` we define the `isCollapsed` variable to false into the scope. [Read more about ng-init](https://docs.angularjs.org/api/ng/directive/ngInit)
 
 ```html
 <div class="navbar navbar-default navbar-static-top" ng-init="isCollapsed = true">
@@ -259,7 +272,7 @@ And that we are using the `$state` that we defined in our `app.js` and the [$sta
 </div>
 ```
 
-#### Server
+### Server
 
 Now that the client files are ready to be served, we need to create our server to display them in the browser.
 
@@ -326,10 +339,6 @@ exports = module.exports = app;
 In `server/routes.js` we define some configuration for the routes, like 404 and other routes.
 
 ```js
-/**
- * Main application routes
- */
-
 'use strict';
 
 var path = require('path');
@@ -352,10 +361,6 @@ module.exports = function (app) {
 in `server/config/index.js` we define some common configuration for the server:
 
 ```js
-/*
- * Config
- */
-
 'use strict';
 
 var path = require('path');
@@ -375,10 +380,6 @@ module.exports = {
 And in `server/config/express.js` we setup express to serve our files.
 
 ```js
-/**
- * Express configuration
- */
-
 'use strict';
 
 var express = require('express');
@@ -400,10 +401,6 @@ module.exports = function(app) {
 In `server/components/errors/index.js` we define app errors like how 404 should behave and what to response.
 
 ```js
-/**
- * Error responses
- */
-
 'use strict';
 
 var path = require('path');
@@ -448,15 +445,82 @@ $ node server/app.js
 Express server listening on 9000, in development mode
 ```
 
-Open your browser and yo should see your app in `http://localhost:9000`
+Open your browser and yo should see the app in `http://localhost:9000`
+
+## Tests
+
+Let's write some tests with [Mocha](http://mochajs.org) and [Chai](http://chaijs.com/)
+
+For running the tests we will be using [Karma](https://karma-runner.github.io) test runner.
+
+```sh
+$ npm install --save-dev karma karma-mocha karma-chai karma-phantomjs-launcher karma-ng-html2js-preprocessor
+```
+
+Now we need to create a `karma.conf.js` file, grab it from the [repo](link) and put it in the root directory of the project.
+
+And since we are writing tests for Angular, we will need  [angular-mocks](https://github.com/angular/bower-angular-mocks), let's install it and create the tests directory structure:
+
+```sh
+$ bower install angular-mocks
+$ mkdir -p test/client/app
+$ mkdir test/client/app/main
+$ mkdir test/client/app/about
+```
+
+Create the following files:
+
+- [test/client/app/app.test.js](link)
+- [test/client/app/main/main.test.js](link)
+- [test/client/app/main/main-controller.test.js](link)
+- [test/client/app/about/about.test.js](link)
+
+See how we mimic the directory structure but files ending in `.test.js` to easyly know where the unit test are located for each file.
+
+In `test/client/app/app.test.js` we add some test to check the angular module is being created.
+
+```js
+describe('app', function () {
+  'use strict';
+  // load our angular moule befor each test
+  beforeEach(module('app'));
+
+  describe('app tests', function () {
+    it('should recognize our angular module', function () {
+      expect(angular.module('app')).to.exist;
+    });
+  });
+});
+```
+
+In `test/client/app/main/main.test.js`
+
+#### Run tests
+
+Add/modify the `test`command in the `package.json` file to be:
+
+```json
+"scripts": {
+  "test": "node ./node_modules/karma/bin/karma start --single-run"
+}
+```
+
+Now you will be able to run the tests with
+
+```sh
+$ npm test
+```
 
 ## Docker
 
-Check on their website on [how to install Docker](https://docs.docker.com/installation/mac/#command-line-docker-with-boot2docker) for Mac OS X
+### Installation
+
+Check their website on [how to install Docker for Mac OS X](https://docs.docker.com/installation/mac/#command-line-docker-with-boot2docker)
 
 One way is using [Homebrew](http://brew.sh)
 
 1) Install Homebrew
+
 ```sh
 $ ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 ```
@@ -476,3 +540,135 @@ $ brew install docker
 ```sh
 $ brew install boot2docker
 ```
+
+### Start Docker
+
+To start Docker run:
+
+```sh
+$ boot2docker up
+```
+
+You should see a similar output:
+
+```sh
+Waiting for VM and Docker daemon to start...
+..........ooo
+Started.
+Writing /Users/Denis/.boot2docker/certs/boot2docker-vm/ca.pem
+Writing /Users/Denis/.boot2docker/certs/boot2docker-vm/cert.pem
+Writing /Users/Denis/.boot2docker/certs/boot2docker-vm/key.pem
+
+To connect the Docker client to the Docker daemon, please set:
+    export DOCKER_TLS_VERIFY=1
+    export DOCKER_HOST=tcp://192.168.59.103:2376
+    export DOCKER_CERT_PATH=/Users/<user>/.boot2docker/certs/boot2docker-vm
+```
+
+So follow the instructions to connect the Docker client, use the values provided in your terminal, (i.e. `<user>` should be your user)
+
+```sh
+$ export DOCKER_TLS_VERIFY=1
+$ export DOCKER_HOST=tcp://192.168.59.103:2376
+$ export DOCKER_CERT_PATH=/Users/<user>/.boot2docker/certs/boot2docker-vm
+```
+
+Now you should be able to run something like `docker ps` to check docker is running.
+
+### So, what is Docker?
+
+Watch an introduction video to Docker in the official site https://www.docker.com/whatisdocker/
+
+Basicly let's you create an isolated container with all the files, including dependencies, binaries, for your app to run, making it easier to ship and deploy.
+
+### Dockerfile
+
+To tell Docker what to include in the [container](https://docs.docker.com/terms/container/) we first need to create an [image](https://docs.docker.com/terms/image/) from a [Dockerfile](https://docs.docker.com/reference/builder/) definition.
+
+Let's create out `Dockerfile` in the root directory of our project.
+
+```
+# This image will be based on the oficial nodejs docker image
+# This image will be based on the oficial nodejs docker image
+FROM node:latest
+
+# Set in what directory commands will run
+WORKDIR /home/app
+
+# Put all our code inside that directory that lives in the container
+ADD . /home/app
+
+# Install dependencies
+RUN \
+    npm install -g bower && \
+    npm install && \
+    bower install --config.interactive=false --allow-root
+
+# Tell Docker we are going to use this port
+EXPOSE 9000
+
+# The command to run our app when the container is run
+CMD ["node", "server/app.js"]
+```
+
+#### Create Docker image
+So, as you can se everything is commented in the Dockerfile to understand what steps are taken for creating the Docker image.
+
+To finally create the image we need to run
+
+```sh
+$ docker build -t app .
+```
+
+To see the newly created image run `docker images` you should see something like:
+
+```sh
+REPOSITORY          TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
+app                 latest              4ad898544bec        4 minutes ago       751.6 MB
+```
+
+#### Run a Docker container
+
+To run a container using the image we just created run:
+
+```sh
+$ docker run -d --name my_app -p 80:9000 app
+```
+
+This will run a container in the background (dettached) `-d` with the `--name` `my_app`
+map port `-p`  `80` to port `9000`
+from the image named `app`
+
+To see our app inside the container we will need to know the ip of the virtual machine (boot2docker) to know that simply run:
+
+```sh
+$ boot2docker ip
+```
+
+Go to your browser and enter that ip, you should see the app.
+
+##### Other Docker commands
+
+To see running containers use `docker ps`
+To see all containers use `docker ps -a`
+To stop a container use `docker stop <container_id_or_name>`
+To start an existing container use `docker start <container_id_or_name>`
+To see the logs of a container use `docker logs -f <container_id_or_name>` `-f` is optional, will keep STDIN attached to current terminal
+
+#### Push your image to DockerHub
+
+We are going to add an Automated build repository in DockerHub, for that we first need to push the code to Github.
+
+[See how to create a repository on github](https://help.github.com/articles/create-a-repo/)
+Then link your Github account with DockerHub to add an automated build repo:
+[See how to add automated build repo in DockerHub](https://docs.docker.com/userguide/dockerrepos/#automated-builds)
+
+After adding your repo, you should see the build status of your image in the Build Details tab.
+
+Creating an automated build repo means that every time you make a push to your github repo, a build will be trigger in DockerHub to build your new image.
+
+In the next section we will see how to deploy your app in DigitalOcean automatically after each of those builds to publish the latest changes.
+
+## Tutum & Continuous Delivery
+
+[Tutum](https://www.tutum.co/) is a free forever platform that helps you manage your software deployment lifecycle into any cloud service provider.
