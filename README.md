@@ -555,9 +555,9 @@ You should see a similar output:
 Waiting for VM and Docker daemon to start...
 ..........ooo
 Started.
-Writing /Users/Denis/.boot2docker/certs/boot2docker-vm/ca.pem
-Writing /Users/Denis/.boot2docker/certs/boot2docker-vm/cert.pem
-Writing /Users/Denis/.boot2docker/certs/boot2docker-vm/key.pem
+Writing /Users/<user>/.boot2docker/certs/boot2docker-vm/ca.pem
+Writing /Users/<user>/.boot2docker/certs/boot2docker-vm/cert.pem
+Writing /Users/<user>/.boot2docker/certs/boot2docker-vm/key.pem
 
 To connect the Docker client to the Docker daemon, please set:
     export DOCKER_TLS_VERIFY=1
@@ -573,7 +573,7 @@ $ export DOCKER_HOST=tcp://192.168.59.103:2376
 $ export DOCKER_CERT_PATH=/Users/<user>/.boot2docker/certs/boot2docker-vm
 ```
 
-Now you should be able to run something like `docker ps` to check docker is running.
+Now you should be able to run something like `docker version` to check docker is running.
 
 ### So, what is Docker?
 
@@ -650,9 +650,13 @@ Go to your browser and enter that ip, you should see the app.
 ##### Other Docker commands
 
 To see running containers use `docker ps`
+
 To see all containers use `docker ps -a`
+
 To stop a container use `docker stop <container_id_or_name>`
+
 To start an existing container use `docker start <container_id_or_name>`
+
 To see the logs of a container use `docker logs -f <container_id_or_name>` `-f` is optional, will keep STDIN attached to current terminal
 
 #### Push your image to DockerHub
@@ -660,7 +664,9 @@ To see the logs of a container use `docker logs -f <container_id_or_name>` `-f` 
 We are going to add an Automated build repository in DockerHub, for that we first need to push the code to Github.
 
 [See how to create a repository on github](https://help.github.com/articles/create-a-repo/)
+
 Then link your Github account with DockerHub to add an automated build repo:
+
 [See how to add automated build repo in DockerHub](https://docs.docker.com/userguide/dockerrepos/#automated-builds)
 
 After adding your repo, you should see the build status of your image in the Build Details tab.

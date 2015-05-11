@@ -1,0 +1,5 @@
+web:
+  image: dciccale/docker-angular-tutum
+  autorestart: always
+  ports:
+    - "80:9000"
