@@ -1,6 +1,6 @@
 # Docker, AngularJS and Tutum — Part 1
 
-IMAGE HERE
+![](https://tutumcloud.files.wordpress.com/2015/06/tutorial-angular1.png)
 
 Level: Beginner
 
