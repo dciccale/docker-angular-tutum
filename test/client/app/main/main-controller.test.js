@@ -1,14 +1,13 @@
 describe('main', function () {
   'use strict';
 
-  var $rootScope, $state, $scope;
+  var $rootScope, $scope;
 
   beforeEach(module('app'));
   beforeEach(module('app/main/main.html'));
 
-  beforeEach(inject(function (_$rootScope_, _$state_, $controller) {
+  beforeEach(inject(function (_$rootScope_, $controller) {
     $rootScope = _$rootScope_;
-    $state = _$state_;
     $scope = $rootScope.$new();
     $controller('MainCtrl', {$scope: $scope});
     $scope.$digest();
