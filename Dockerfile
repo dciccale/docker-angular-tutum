@@ -1,5 +1,5 @@
 # This image will be based on the oficial nodejs docker image
-FROM node:alpine
+FROM node:8.9.3
 
 # Set in what directory commands will run
 WORKDIR /home/app
