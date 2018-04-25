@@ -10,7 +10,6 @@ ADD . /home/app
 ENV NODE_ENV=production
 
 # Install dependencies
-RUN apk update && apk add vim && apk add git
 RUN npm install -g bower
 RUN npm install --no-progress
 RUN bower install --config.interactive=false --allow-root
