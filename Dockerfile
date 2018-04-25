@@ -5,7 +5,7 @@ ADD package.json /tmp/package.json
 
 # Install dependencies
 RUN cd /tmp \
-    npm install -g bower && \
+    sudo npm install -g bower && \
     npm install --no-progress && \
     bower install --config.interactive=false --allow-root
 
