@@ -7,6 +7,8 @@ WORKDIR /home/app
 # Put all our code inside that directory that lives in the container
 ADD . /home/app
 
+ENV NODE_ENV=production
+
 # Install dependencies
 RUN \
     apk update && apk add vim && apk add git && \
