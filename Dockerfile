@@ -11,6 +11,7 @@ ENV NODE_ENV=production
 
 # Install dependencies
 RUN \
+    node -v && \
     apk update && apk add vim && apk add git && \
     npm install -g bower && \
     npm install --no-progress && \
