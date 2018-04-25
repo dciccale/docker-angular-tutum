@@ -10,12 +10,10 @@ ADD . /home/app
 ENV NODE_ENV=production
 
 # Install dependencies
-RUN \
-    node -v && \
-    apk update && apk add vim && apk add git && \
-    npm install -g bower && \
-    npm install --no-progress && \
-    bower install --config.interactive=false --allow-root
+RUN apk update && apk add vim && apk add git
+RUN npm install -g bower
+RUN npm install --no-progress
+RUN bower install --config.interactive=false --allow-root
 
 # Tell Docker we are going to use this port
 EXPOSE 9000
